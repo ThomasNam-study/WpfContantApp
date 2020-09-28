@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,9 +23,13 @@ namespace ContactApp
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		List<Contact> contacts = null;
+
 		public MainWindow()
 		{
 			InitializeComponent();
+
+			contacts = new List<Contact> ();
 
 			ReadDatabase();
 		}
@@ -40,25 +45,41 @@ namespace ContactApp
 
 		void ReadDatabase()
 		{
-			List<Contact> contacts = null;
-
 			using (var connection = new SQLiteConnection(App.databasePath))
 			{
-				contacts = connection.Table<Contact>().ToList();
+				connection.CreateTable<Contact>();
+
+				contacts = (connection.Table<Contact>().ToList()).OrderBy ((c) => c.Name).ToList ();
+
+
 			}
 
 			if (contacts != null)
 			{
 				contactListView.ItemsSource = contacts;
-
-				/*foreach (var c in contacts)
-				{
-					contactListView.Items.Add(new ListViewItem()
-					{
-						Content = c
-					});
-				}*/
 			}
+		}
+
+		private void TxtSearch_OnTextChanged (object sender, TextChangedEventArgs e)
+		{
+			var searchText = txtSearch.Text.ToLower();
+
+			var filteredList = contacts.Where ((c) => c.Name.ToLower().Contains (searchText));
+
+			contactListView.ItemsSource = filteredList;
+		}
+
+		private void ContactListView_OnSelectionChanged (object sender, SelectionChangedEventArgs e)
+		{
+			if (contactListView.SelectedItem is Contact contact)
+			{
+				var updateWindows = new ContactDetailsWindow (contact);
+
+				updateWindows.ShowDialog();
+
+				ReadDatabase ();
+			}
+			
 		}
 	}
 }
