@@ -21,7 +21,31 @@ namespace ContactApp.Controls
 	/// </summary>
 	public partial class ContactControl : UserControl
 	{
-		private Contact contact;
+
+
+		public Contact Contact
+		{
+			get { return (Contact)GetValue(ContactProperty); }
+			set { SetValue(ContactProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for Contact.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty ContactProperty =
+			DependencyProperty.Register("Contact", typeof(Contact), typeof(ContactControl), new PropertyMetadata(null, SetText));
+
+		private static void SetText(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			if (d is ContactControl control)
+			{
+				control.txtName.Text = (e.NewValue as Contact)?.Name;
+				control.txtEmail.Text = (e.NewValue as Contact)?.Email;
+				control.txtPhone.Text = (e.NewValue as Contact)?.Phone;
+			}
+
+		}
+
+
+		/*private Contact contact;
 
 		public Contact Contact
 		{
@@ -33,7 +57,7 @@ namespace ContactApp.Controls
 				txtEmail.Text = contact.Email;
 				txtPhone.Text = contact.Phone;
 			}
-		}
+		}*/
 
 		public ContactControl()
 		{
